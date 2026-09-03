@@ -15,163 +15,73 @@ st.set_page_config(
 )
 
 # ============================================================
-# ESTILOS
+# ESTILO VISUAL
 # ============================================================
 
 st.markdown("""
 <style>
 
-    /* Fondo general */
-    .stApp {
-        background-color: #f7faf9;
-    }
+.stApp {
+    background-color: #f7faf9;
+}
 
-    /* Título */
-    .main-title {
-        font-size: 42px;
-        font-weight: 700;
-        color: #182b3a;
-        margin-bottom: 0px;
-    }
+h1 {
+    color: #182b3a;
+}
 
-    .subtitle {
-        font-size: 18px;
-        color: #6b7c88;
-        margin-top: -8px;
-        margin-bottom: 30px;
-    }
+h2, h3 {
+    color: #182b3a;
+}
 
-    /* Tarjetas */
-    .card {
-        background-color: white;
-        border: 1px solid #dfe7e4;
-        border-radius: 18px;
-        padding: 25px;
-        height: 190px;
-        box-shadow: 0px 3px 12px rgba(0,0,0,0.04);
-    }
+.block-container {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
 
-    .card-title {
-        font-size: 17px;
-        color: #657782;
-        font-weight: 600;
-        margin-bottom: 15px;
-    }
+[data-testid="stMetric"] {
+    background-color: white;
+    border: 1px solid #dfe7e4;
+    padding: 20px;
+    border-radius: 16px;
+}
 
-    .card-value {
-        font-size: 40px;
-        font-weight: 700;
-        color: #182b3a;
-    }
+[data-testid="stMetricValue"] {
+    color: #182b3a;
+}
 
-    .card-description {
-        font-size: 14px;
-        color: #83919a;
-        margin-top: 8px;
-    }
+.simulacion {
+    background-color: #fff5d9;
+    border: 1px solid #f1d58b;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
 
-    /* Estado */
-    .status-active {
-        background-color: #dceefe;
-        border-radius: 14px;
-        padding: 20px 25px;
-        color: #1164a3;
-        font-size: 18px;
-        margin-top: 25px;
-        margin-bottom: 30px;
-    }
+.riego {
+    background-color: #dceefe;
+    border: 1px solid #b9d8f5;
+    padding: 18px;
+    border-radius: 14px;
+    color: #1164a3;
+    font-size: 18px;
+    margin: 20px 0;
+}
 
-    .status-normal {
-        background-color: #e1f5e9;
-        border-radius: 14px;
-        padding: 20px 25px;
-        color: #18834b;
-        font-size: 18px;
-        margin-top: 25px;
-        margin-bottom: 30px;
-    }
-
-    /* Modo simulación */
-    .simulation {
-        background-color: #fff5d9;
-        border: 1px solid #f1d58b;
-        border-radius: 12px;
-        padding: 12px 18px;
-        color: #80621b;
-        margin-bottom: 25px;
-        font-size: 14px;
-    }
-
-    /* Estado del sistema */
-    .system-box {
-        background-color: white;
-        border: 1px solid #dfe7e4;
-        border-radius: 16px;
-        padding: 20px;
-        margin-top: 10px;
-    }
-
-    .system-title {
-        font-size: 20px;
-        font-weight: 700;
-        color: #182b3a;
-        margin-bottom: 15px;
-    }
-
-    .system-item {
-        font-size: 16px;
-        color: #344955;
-        margin: 12px 0;
-    }
-
-    /* Animación gota */
-    .drop {
-        display: inline-block;
-        animation: dropAnimation 1s infinite;
-    }
-
-    @keyframes dropAnimation {
-        0% {
-            transform: translateY(-6px);
-            opacity: 0.4;
-        }
-
-        50% {
-            transform: translateY(5px);
-            opacity: 1;
-        }
-
-        100% {
-            transform: translateY(-6px);
-            opacity: 0.4;
-        }
-    }
-
-    /* Planta */
-    .plant {
-        font-size: 42px;
-        animation: plantAnimation 2s infinite ease-in-out;
-    }
-
-    @keyframes plantAnimation {
-        0% {
-            transform: rotate(-2deg);
-        }
-
-        50% {
-            transform: rotate(2deg);
-        }
-
-        100% {
-            transform: rotate(-2deg);
-        }
-    }
+.normal {
+    background-color: #e1f5e9;
+    border: 1px solid #bde4cb;
+    padding: 18px;
+    border-radius: 14px;
+    color: #18834b;
+    font-size: 18px;
+    margin: 20px 0;
+}
 
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================================
-# ESTADO DE LA SIMULACIÓN
+# VARIABLES INICIALES
 # ============================================================
 
 if "humedad" not in st.session_state:
@@ -187,28 +97,26 @@ if "ultima_actualizacion" not in st.session_state:
     st.session_state.ultima_actualizacion = time.time()
 
 # ============================================================
-# SIMULACIÓN DE HUMEDAD
+# SIMULACIÓN DEL SENSOR
 # ============================================================
 
 ahora = time.time()
 
-# Actualizamos aproximadamente cada segundo
 if ahora - st.session_state.ultima_actualizacion >= 1:
 
     humedad = st.session_state.humedad
     umbral = st.session_state.umbral
 
     # --------------------------------------------------------
-    # Si está seco → regamos → humedad aumenta
+    # SUELO SECO → SE ACTIVA EL RIEGO
     # --------------------------------------------------------
 
     if humedad < umbral:
 
-        humedad += np.random.uniform(0.4, 1.3)
+        humedad += np.random.uniform(0.5, 1.5)
 
     # --------------------------------------------------------
-    # Si ya hay suficiente humedad → deja de regar
-    # y lentamente vuelve a bajar
+    # SUELO HÚMEDO → EL RIEGO SE DETIENE
     # --------------------------------------------------------
 
     else:
@@ -219,20 +127,20 @@ if ahora - st.session_state.ultima_actualizacion >= 1:
 
     st.session_state.humedad = humedad
 
-    # Guardar historial
+    # Guardar lectura
     st.session_state.historial.append({
         "Hora": datetime.now().strftime("%H:%M:%S"),
         "Humedad": round(humedad, 1)
     })
 
-    # Mantener solamente las últimas 30 lecturas
+    # Mantener las últimas 30 lecturas
     if len(st.session_state.historial) > 30:
         st.session_state.historial.pop(0)
 
     st.session_state.ultima_actualizacion = ahora
 
 # ============================================================
-# VARIABLES
+# DATOS ACTUALES
 # ============================================================
 
 humedad = st.session_state.humedad
@@ -241,30 +149,26 @@ umbral = st.session_state.umbral
 valvula_abierta = humedad < umbral
 
 # ============================================================
-# TÍTULO
+# ENCABEZADO
 # ============================================================
 
-st.markdown(
-    '<div class="main-title">🌱 Smart Irrigation</div>',
-    unsafe_allow_html=True
+st.title("🌱 Smart Irrigation")
+
+st.write(
+    "Monitoreo remoto del sistema de riego"
 )
 
-st.markdown(
-    '<div class="subtitle">Monitoreo remoto del sistema de riego</div>',
-    unsafe_allow_html=True
+st.divider()
+
+# ============================================================
+# MODO SIMULACIÓN
+# ============================================================
+
+st.info(
+    "🧪 MODO SIMULACIÓN — Los datos mostrados actualmente "
+    "son generados automáticamente para representar el "
+    "comportamiento esperado del sistema físico."
 )
-
-# ============================================================
-# AVISO DE SIMULACIÓN
-# ============================================================
-
-st.markdown("""
-<div class="simulation">
-    🧪 <b>MODO SIMULACIÓN</b> — Los datos mostrados actualmente
-    son generados automáticamente para representar el comportamiento
-    esperado del sistema físico.
-</div>
-""", unsafe_allow_html=True)
 
 # ============================================================
 # TARJETAS PRINCIPALES
@@ -272,90 +176,38 @@ st.markdown("""
 
 col1, col2, col3 = st.columns(3)
 
-# ------------------------------------------------------------
-# HUMEDAD
-# ------------------------------------------------------------
-
 with col1:
 
-    st.markdown(f"""
-    <div class="card">
-
-        <div class="card-title">
-            💧 Humedad actual
-        </div>
-
-        <div class="card-value">
-            {humedad:.0f}%
-        </div>
-
-        <div class="card-description">
-            Lectura del sensor de humedad
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# ------------------------------------------------------------
-# UMBRAL
-# ------------------------------------------------------------
+    st.metric(
+        label="💧 Humedad actual",
+        value=f"{humedad:.0f}%",
+        delta=f"{humedad - umbral:.0f}% respecto al umbral"
+    )
 
 with col2:
 
-    st.markdown(f"""
-    <div class="card">
-
-        <div class="card-title">
-            🎯 Umbral configurado
-        </div>
-
-        <div class="card-value">
-            {umbral}%
-        </div>
-
-        <div class="card-description">
-            Nivel mínimo de humedad
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# ------------------------------------------------------------
-# VÁLVULA
-# ------------------------------------------------------------
+    st.metric(
+        label="🎯 Umbral configurado",
+        value=f"{umbral}%"
+    )
 
 with col3:
 
     if valvula_abierta:
 
-        estado = "💧 ABIERTA"
-        descripcion = "Riego actualmente activo"
+        st.metric(
+            label="🚿 Estado de válvula",
+            value="ABIERTA",
+            delta="Riego activo"
+        )
 
     else:
 
-        estado = "🔒 CERRADA"
-        descripcion = "Riego detenido"
-
-    st.markdown(f"""
-    <div class="card">
-
-        <div class="card-title">
-            🚿 Estado de válvula
-        </div>
-
-        <div class="card-value">
-            {estado}
-        </div>
-
-        <div class="card-description">
-            {descripcion}
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
+        st.metric(
+            label="🚿 Estado de válvula",
+            value="CERRADA",
+            delta="Riego detenido"
+        )
 
 # ============================================================
 # ESTADO DEL RIEGO
@@ -363,40 +215,51 @@ with col3:
 
 if valvula_abierta:
 
-    st.markdown("""
-    <div class="status-active">
-
-        <span class="drop">💧</span>
-
-        <b> RIEGO ACTIVO</b>
-
-        — La humedad está por debajo del umbral.
-
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        '<div class="riego">'
+        '💧 <b>RIEGO ACTIVO</b><br>'
+        'La humedad está por debajo del umbral. '
+        'La válvula está abierta.'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
 else:
 
-    st.markdown("""
-    <div class="status-normal">
-
-        🌱 <b>HUMEDAD ADECUADA</b>
-
-        — El riego está detenido.
-
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown(
+        '<div class="normal">'
+        '🌱 <b>HUMEDAD ADECUADA</b><br>'
+        'El nivel de humedad es suficiente. '
+        'La válvula permanece cerrada.'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
 # ============================================================
-# GRÁFICA
+# BARRA DE HUMEDAD
+# ============================================================
+
+st.subheader("💧 Nivel de humedad")
+
+st.progress(
+    int(humedad)
+)
+
+st.caption(
+    f"Humedad actual: {humedad:.1f}%"
+)
+
+# ============================================================
+# HISTORIAL
 # ============================================================
 
 st.subheader("📈 Historial de humedad")
 
-if len(st.session_state.historial) > 0:
+if len(st.session_state.historial) > 1:
 
-    df = pd.DataFrame(st.session_state.historial)
+    df = pd.DataFrame(
+        st.session_state.historial
+    )
 
     df = df.set_index("Hora")
 
@@ -407,8 +270,9 @@ if len(st.session_state.historial) > 0:
 
 else:
 
-    st.info("Esperando datos de humedad...")
-
+    st.info(
+        "Recopilando datos para generar el historial..."
+    )
 
 # ============================================================
 # ESTADO DEL SISTEMA
@@ -420,68 +284,65 @@ col1, col2, col3, col4 = st.columns(4)
 
 with col1:
 
-    st.metric(
-        "Arduino",
-        "SIMULADO"
-    )
+    st.success("🟢 Arduino\n\nSIMULADO")
 
 with col2:
 
-    st.metric(
-        "Sensor",
-        "FUNCIONANDO"
-    )
+    st.success("🟢 Sensor\n\nFUNCIONANDO")
 
 with col3:
 
-    st.metric(
-        "Válvula",
-        "ABIERTA" if valvula_abierta else "CERRADA"
-    )
+    if valvula_abierta:
+        st.info("💧 Válvula\n\nABIERTA")
+    else:
+        st.success("🔒 Válvula\n\nCERRADA")
 
 with col4:
 
-    st.metric(
-        "Comunicación",
-        "SIMULADA"
-    )
-
+    st.success("🟢 Comunicación\n\nSIMULADA")
 
 # ============================================================
-# INFORMACIÓN DEL CULTIVO
+# ESTADO DEL CULTIVO
 # ============================================================
 
 st.subheader("🌱 Estado del cultivo")
 
-col1, col2 = st.columns([1, 3])
+if humedad < 25:
 
-with col1:
-
-    st.markdown(
-        '<div class="plant">🌱</div>',
-        unsafe_allow_html=True
+    st.warning(
+        "🌵 El suelo está muy seco. "
+        "El sistema mantiene el riego activado."
     )
 
-with col2:
+elif humedad < umbral:
 
-    if humedad < 25:
+    st.info(
+        "💧 El suelo está seco. "
+        "El sistema está realizando el riego automáticamente."
+    )
 
-        mensaje = "El suelo está muy seco. El sistema necesita regar."
+elif humedad < 70:
 
-    elif humedad < umbral:
+    st.success(
+        "🌱 El cultivo presenta un nivel de humedad adecuado."
+    )
 
-        mensaje = "El suelo está seco. El riego está activado."
+else:
 
-    elif humedad < 70:
+    st.info(
+        "💦 El suelo presenta un nivel alto de humedad."
+    )
 
-        mensaje = "La humedad se encuentra en un rango adecuado."
+# ============================================================
+# INFORMACIÓN DE SIMULACIÓN
+# ============================================================
 
-    else:
+st.divider()
 
-        mensaje = "El suelo presenta un nivel alto de humedad."
-
-    st.write(mensaje)
-
+st.caption(
+    "Smart Irrigation • Prototipo de monitoreo remoto • "
+    "Modo demostración"
+)
 
 # ============================================================
 # ACTUALIZACIÓN AUTOMÁTICA
